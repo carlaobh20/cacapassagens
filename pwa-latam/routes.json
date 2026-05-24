@@ -1,0 +1,23 @@
+{
+  "_README": "Lista de rotas monitoradas pelo Caça-passagem. Editado via PWA — não edite à mão a menos que saiba o que está fazendo.",
+  "version": 2,
+  "updatedAt": "2026-05-23",
+  "routes": [
+    {
+      "id": "gru-mco-sfo",
+      "name": "Orlando (volta SF/LA)",
+      "outboundFrom": "GRU",
+      "outboundTo": "MCO",
+      "returnFrom": "SFO",
+      "returnToCandidates": ["SFO", "LAX"],
+      "returnTo": "GRU",
+      "month": "2026-09",
+      "tripDays": 30,
+      "passengers": 1,
+      "cabin": "Economy",
+      "redemption": true,
+      "enabled": true,
+      "createdAt": "2026-05-23"
+    }
+  ]
+}
