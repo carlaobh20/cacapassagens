@@ -14,32 +14,68 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract latest entry from data.json
+      - name: Build push title and body
         id: data
         run: |
-          LATEST=$(jq '.history[-1]' pwa-latam/data.json)
-          TOTAL_MI=$(echo "$LATEST" | jq -r '.totalMiles')
-          TOTAL_BRL=$(echo "$LATEST" | jq -r '.totalCashBRL')
-          OUT_DATE=$(echo "$LATEST" | jq -r '.out.depDate')
-          RET_DATE=$(echo "$LATEST" | jq -r '.ret.depDate')
-          RET_FROM=$(echo "$LATEST" | jq -r '.ret.from')
-          SLOT=$(echo "$LATEST" | jq -r '.slot // "atualizacao"')
-          OUT_FMT=$(echo "$OUT_DATE" | awk -F- '{print $3"/"$2}')
-          RET_FMT=$(echo "$RET_DATE" | awk -F- '{print $3"/"$2}')
-          MI_FMT=$(printf "%'d" "$TOTAL_MI" | tr ',' '.')
-          BRL_FMT=$(printf "%.2f" "$TOTAL_BRL" | tr '.' ',')
-          case "$SLOT" in
-            madrugada) EMOJI="🌙"; SLOTLBL="Madrugada" ;;
-            manha)     EMOJI="☀️"; SLOTLBL="Manhã" ;;
-            noite)     EMOJI="🌃"; SLOTLBL="Noite" ;;
-            *)         EMOJI="✈️"; SLOTLBL="Atualização" ;;
-          esac
-          TITLE="✈️ Caça-passagem ${EMOJI} ${SLOTLBL}"
-          BODY="${MI_FMT} milhas + R\$ ${BRL_FMT} • Ida ${OUT_FMT} • Volta ${RET_FROM} ${RET_FMT}"
+          DATA=$(cat pwa-latam/data.json)
+          BODY=""
+          BEST_MILES=999999999
+          BEST_NAME=""
+          NUM_ROUTES=0
+
+          for routeId in $(echo "$DATA" | jq -r '.routes | keys[]'); do
+            NAME=$(echo "$DATA" | jq -r --arg id "$routeId" '.routes[$id].name // $id')
+            LAST=$(echo "$DATA" | jq --arg id "$routeId" '.routes[$id].history[-1]')
+            if [ "$LAST" = "null" ] || [ -z "$LAST" ]; then continue; fi
+
+            TOTAL_MI=$(echo "$LAST" | jq -r '.totalMiles')
+            TOTAL_BRL=$(echo "$LAST" | jq -r '.totalCashBRL')
+            OUT_DATE=$(echo "$LAST" | jq -r '.out.depDate')
+            RET_DATE=$(echo "$LAST" | jq -r '.ret.depDate')
+            RET_FROM=$(echo "$LAST" | jq -r '.ret.from')
+
+            OUT_FMT=$(echo "$OUT_DATE" | awk -F- '{print $3"/"$2}')
+            RET_FMT=$(echo "$RET_DATE" | awk -F- '{print $3"/"$2}')
+
+            PREV_MIN=$(echo "$DATA" | jq --arg id "$routeId" '[.routes[$id].history[:-1][].totalMiles] | min // 999999999')
+            PROMO=""
+            if [ "$TOTAL_MI" -lt "$PREV_MIN" ] 2>/dev/null && [ "$PREV_MIN" -ne 999999999 ] 2>/dev/null; then
+              PROMO=" \ud83d\udd25"
+            fi
+
+            MI_FMT=$(printf "%'d" "$TOTAL_MI" 2>/dev/null | tr ',' '.')
+            BRL_FMT=$(printf "%.2f" "$TOTAL_BRL" | tr '.' ',')
+
+            BODY="${BODY}• ${NAME}: ${MI_FMT} mi + R\$ ${BRL_FMT} (${OUT_FMT} → ${RET_FROM} ${RET_FMT})${PROMO}\n"
+
+            if [ "$TOTAL_MI" -lt "$BEST_MILES" ] 2>/dev/null; then
+              BEST_MILES=$TOTAL_MI
+              BEST_NAME=$NAME
+            fi
+            NUM_ROUTES=$((NUM_ROUTES + 1))
+          done
+
+          if [ "$NUM_ROUTES" -eq 0 ]; then
+            TITLE="✈️ Caça-passagem"
+            BODY="Sem dados disponiveis ainda"
+          elif [ "$NUM_ROUTES" -eq 1 ]; then
+            TITLE="✈️ Caça-passagem - ${BEST_NAME}"
+          else
+            TITLE="✈️ Caça-passagem - ${NUM_ROUTES} rotas atualizadas"
+          fi
+
+          BODY=$(printf "%b" "$BODY" | sed '$ s/\\n$//')
+
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
-          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+          {
+            echo "body<<EOF"
+            echo "$BODY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
           echo "Title: $TITLE"
-          echo "Body: $BODY"
+          echo "Body:"
+          echo "$BODY"
 
       - name: Send push via OneSignal
         env:
@@ -50,14 +86,18 @@ jobs:
             echo "Secrets nao configurados - pulando push"
             exit 0
           fi
+
+          PAYLOAD=$(jq -n \
+            --arg appId "$ONESIGNAL_APP_ID" \
+            --arg title "${{ steps.data.outputs.title }}" \
+            --arg body  "${{ steps.data.outputs.body }}" \
+            --arg url   "https://cacapassagens.vercel.app" \
+            --arg icon  "https://cacapassagens.vercel.app/icon-192.png" \
+            '{app_id: $appId, included_segments: ["Subscribed Users"], headings: {pt: $title, en: $title}, contents: {pt: $body, en: $body}, url: $url, chrome_web_icon: $icon}')
+
           curl -sS -X POST "https://onesignal.com/api/v1/notifications" \
             -H "Content-Type: application/json; charset=utf-8" \
             -H "Authorization: Basic $ONESIGNAL_REST_API_KEY" \
-            --data "$(jq -n \
-              --arg appId "$ONESIGNAL_APP_ID" \
-              --arg title "${{ steps.data.outputs.title }}" \
-              --arg body  "${{ steps.data.outputs.body }}" \
-              --arg url   "https://cacapassagens.vercel.app" \
-              --arg icon  "https://cacapassagens.vercel.app/icon-192.png" \
-              '{app_id: $appId, included_segments: ["Subscribed Users"], headings: {pt: $title, en: $title}, contents: {pt: $body, en: $body}, url: $url, chrome_web_icon: $icon}')"
+            --data "$PAYLOAD"
+          echo ""
           echo "Push enviado"
