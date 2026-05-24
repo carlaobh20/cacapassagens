@@ -1,0 +1,41 @@
+{
+  "trip": {
+    "outboundFrom": "GRU",
+    "outboundTo": "MCO",
+    "returnFromCandidates": ["SFO", "LAX"],
+    "returnTo": "GRU",
+    "outboundMonth": "2026-09",
+    "returnOffsetDays": 30
+  },
+  "history": [
+    {
+      "date": "2026-05-23",
+      "out": {
+        "from": "GRU",
+        "to": "MCO",
+        "depDate": "2026-09-15",
+        "dateLabel": "terça, 15 de setembro 2026",
+        "time": "22:50 → 10:55+1",
+        "duration": "13h05min",
+        "stops": 0,
+        "stopsLabel": "Direto",
+        "miles": 101150,
+        "cashBRL": 184.02
+      },
+      "ret": {
+        "from": "SFO",
+        "to": "GRU",
+        "depDate": "2026-10-15",
+        "dateLabel": "quinta, 15 de outubro 2026",
+        "time": "22:30 → 20:00+1",
+        "duration": "17h30min",
+        "stops": 2,
+        "stopsLabel": "2 paradas",
+        "miles": 79910,
+        "cashBRL": 28.07
+      },
+      "totalMiles": 181060,
+      "totalCashBRL": 212.09
+    }
+  ]
+}
