@@ -1,0 +1,63 @@
+name: Push notification on data update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pwa-latam/data.json'
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract latest entry from data.json
+        id: data
+        run: |
+          LATEST=$(jq '.history[-1]' pwa-latam/data.json)
+          TOTAL_MI=$(echo "$LATEST" | jq -r '.totalMiles')
+          TOTAL_BRL=$(echo "$LATEST" | jq -r '.totalCashBRL')
+          OUT_DATE=$(echo "$LATEST" | jq -r '.out.depDate')
+          RET_DATE=$(echo "$LATEST" | jq -r '.ret.depDate')
+          RET_FROM=$(echo "$LATEST" | jq -r '.ret.from')
+          SLOT=$(echo "$LATEST" | jq -r '.slot // "atualizacao"')
+          OUT_FMT=$(echo "$OUT_DATE" | awk -F- '{print $3"/"$2}')
+          RET_FMT=$(echo "$RET_DATE" | awk -F- '{print $3"/"$2}')
+          MI_FMT=$(printf "%'d" "$TOTAL_MI" | tr ',' '.')
+          BRL_FMT=$(printf "%.2f" "$TOTAL_BRL" | tr '.' ',')
+          case "$SLOT" in
+            madrugada) EMOJI="🌙"; SLOTLBL="Madrugada" ;;
+            manha)     EMOJI="☀️"; SLOTLBL="Manhã" ;;
+            noite)     EMOJI="🌃"; SLOTLBL="Noite" ;;
+            *)         EMOJI="✈️"; SLOTLBL="Atualização" ;;
+          esac
+          TITLE="✈️ Caça-passagem ${EMOJI} ${SLOTLBL}"
+          BODY="${MI_FMT} milhas + R\$ ${BRL_FMT} • Ida ${OUT_FMT} • Volta ${RET_FROM} ${RET_FMT}"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+          echo "Title: $TITLE"
+          echo "Body: $BODY"
+
+      - name: Send push via OneSignal
+        env:
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+        run: |
+          if [ -z "$ONESIGNAL_APP_ID" ] || [ -z "$ONESIGNAL_REST_API_KEY" ]; then
+            echo "Secrets nao configurados - pulando push"
+            exit 0
+          fi
+          curl -sS -X POST "https://onesignal.com/api/v1/notifications" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -H "Authorization: Basic $ONESIGNAL_REST_API_KEY" \
+            --data "$(jq -n \
+              --arg appId "$ONESIGNAL_APP_ID" \
+              --arg title "${{ steps.data.outputs.title }}" \
+              --arg body  "${{ steps.data.outputs.body }}" \
+              --arg url   "https://cacapassagens.vercel.app" \
+              --arg icon  "https://cacapassagens.vercel.app/icon-192.png" \
+              '{app_id: $appId, included_segments: ["Subscribed Users"], headings: {pt: $title, en: $title}, contents: {pt: $body, en: $body}, url: $url, chrome_web_icon: $icon}')"
+          echo "Push enviado"
