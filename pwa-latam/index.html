@@ -11,443 +11,179 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-<title>Caça-passagem LATAM • GRU ↔ Orlando</title>
+<title>Caça-passagem LATAM</title>
 <style>
-:root { color-scheme: light; }
+:root { color-scheme: light; --pink: #ef0e74; --purple: #6f1ab1; --gray-9: #1f2937; --gray-6: #6b7280; --gray-4: #9ca3af; --gray-2: #e5e7eb; --gray-1: #f3f4f6; --bg: #f9fafb; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: #f9fafb;
-  color: #1f2937;
-  line-height: 1.5;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--gray-9); line-height: 1.5; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+button { font-family: inherit; }
 .wrap { max-width: 920px; margin: 0 auto; padding: 12px; }
-.hero {
-  background: linear-gradient(135deg, #ef0e74 0%, #6f1ab1 100%);
-  color: white;
-  border-radius: 16px;
-  padding: 20px 22px;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 14px rgba(239, 14, 116, 0.15);
-}
+.hero { background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%); color: white; border-radius: 16px; padding: 18px 22px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(239, 14, 116, 0.15); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.hero-text { flex: 1; min-width: 0; }
 .hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; }
 .hero .sub { font-size: 12px; opacity: 0.92; }
-.hero .route { font-size: 13px; margin-top: 8px; opacity: 0.95; line-height: 1.4; }
-.refresh-btn {
-  background: rgba(255,255,255,0.18);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 10px;
-}
-.refresh-btn:active { background: rgba(255,255,255,0.3); }
-.card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-.card h2 {
-  margin: 0 0 12px 0;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6b7280;
-  font-weight: 600;
-}
-.deal {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-@media (max-width: 600px) { .deal { grid-template-columns: 1fr; } }
-.leg {
-  background: #fafafa;
-  border: 1px solid #f3f4f6;
-  border-radius: 12px;
-  padding: 12px 14px;
-}
-.leg .label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
-.leg .route-line { font-size: 17px; font-weight: 700; margin: 4px 0 2px; color: #111827; }
-.leg .date { font-size: 12px; color: #6b7280; }
-.leg .price { font-size: 22px; font-weight: 800; color: #ef0e74; margin-top: 8px; line-height: 1.1; }
-.leg .price small { font-size: 12px; font-weight: 500; color: #6b7280; display: block; margin-top: 2px; }
-.leg .meta { font-size: 11px; color: #6b7280; margin-top: 4px; }
-.total {
-  background: linear-gradient(90deg, #fdf2f8, #faf5ff);
-  border: 1px solid #f9a8d4;
-  border-radius: 12px;
-  padding: 14px;
-  margin-top: 12px;
-}
-.total .lbl { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
-.total .val { font-size: 26px; font-weight: 800; color: #6f1ab1; line-height: 1.1; margin-top: 2px; }
-.total .tax { font-size: 13px; color: #6b7280; font-weight: 500; }
-.cta {
-  display: block;
-  text-align: center;
-  margin-top: 12px;
-  padding: 13px 18px;
-  background: #ef0e74;
-  color: white !important;
-  text-decoration: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(239, 14, 116, 0.3);
-}
+.hero-actions { display: flex; gap: 6px; }
+.icon-btn { background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.3); width: 36px; height: 36px; border-radius: 999px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.icon-btn:active { background: rgba(255,255,255,0.3); }
+.card { background: #fff; border: 1px solid var(--gray-2); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+.route-card h3 { margin: 0 0 4px 0; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.route-card .route-line { font-size: 13px; color: var(--gray-6); margin-bottom: 10px; }
+.route-card .deal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+@media (max-width: 600px) { .route-card .deal { grid-template-columns: 1fr; } }
+.leg { background: #fafafa; border: 1px solid var(--gray-1); border-radius: 10px; padding: 10px 12px; }
+.leg .label { font-size: 10px; color: var(--gray-4); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+.leg .route-line { font-size: 15px; font-weight: 700; margin: 3px 0; color: var(--gray-9); }
+.leg .date { font-size: 11px; color: var(--gray-6); }
+.leg .price { font-size: 18px; font-weight: 800; color: var(--pink); margin-top: 6px; line-height: 1.1; }
+.leg .price small { font-size: 11px; font-weight: 500; color: var(--gray-6); display: block; margin-top: 2px; }
+.leg .meta { font-size: 10px; color: var(--gray-6); margin-top: 3px; }
+.total { background: linear-gradient(90deg, #fdf2f8, #faf5ff); border: 1px solid #f9a8d4; border-radius: 10px; padding: 10px 12px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.total .lbl { font-size: 10px; color: var(--gray-6); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.total .val { font-size: 20px; font-weight: 800; color: var(--purple); line-height: 1.1; }
+.total .tax { font-size: 11px; color: var(--gray-6); font-weight: 500; }
+.cta { display: inline-block; padding: 8px 14px; background: var(--pink); color: white !important; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 700; }
 .cta:active { background: #d10c66; }
-.chart-wrap { position: relative; height: 200px; }
-.history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.history-table th, .history-table td {
-  text-align: left;
-  padding: 8px 6px;
-  border-bottom: 1px solid #f3f4f6;
-}
-.history-table th { color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
-.history-table tr:last-child td { border-bottom: none; }
-.history-table td:nth-child(4) { font-weight: 700; color: #6f1ab1; }
-.empty { color: #9ca3af; font-size: 13px; font-style: italic; padding: 20px; text-align: center; }
-.promo-banner {
-  background: linear-gradient(90deg, #fef3c7, #fde68a);
-  border: 1px solid #f59e0b;
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #92400e;
-  font-weight: 600;
-  display: none;
-}
-.promo-banner.show { display: block; animation: pulse 2s infinite; }
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-.status {
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: center;
-  margin: 8px 0;
-}
+.chart-wrap { position: relative; height: 140px; margin-top: 8px; }
+.promo-badge { background: linear-gradient(90deg, #fef3c7, #fde68a); color: #92400e; font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+.empty { color: var(--gray-4); font-size: 13px; font-style: italic; padding: 18px; text-align: center; }
+.status { font-size: 11px; color: var(--gray-4); text-align: center; margin: 8px 0; }
 .status.error { color: #dc2626; }
-.foot {
-  font-size: 10px;
-  color: #9ca3af;
-  text-align: center;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid #f3f4f6;
-  line-height: 1.6;
-}
-.install-prompt {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
-  background: #1f2937;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 13px;
-  display: none;
-  z-index: 1000;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-}
+.foot { font-size: 10px; color: var(--gray-4); text-align: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--gray-1); line-height: 1.6; }
+.install-prompt { position: fixed; bottom: 16px; left: 16px; right: 16px; background: #1f2937; color: white; padding: 12px 16px; border-radius: 12px; font-size: 13px; display: none; z-index: 1000; box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
 .install-prompt.show { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.install-prompt button {
-  background: #ef0e74;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.skeleton {
-  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 6px;
-  display: inline-block;
-  height: 1em;
-  width: 60%;
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
+.install-prompt button { background: var(--pink); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+.skeleton { background: linear-gradient(90deg, var(--gray-1) 0%, var(--gray-2) 50%, var(--gray-1) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; display: inline-block; height: 1em; width: 60%; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.screen { display: none; }
+.screen.active { display: block; }
+.screen-header { display: flex; align-items: center; gap: 10px; padding: 8px 0 14px; }
+.back-btn { background: transparent; border: none; font-size: 22px; cursor: pointer; padding: 4px 8px; color: var(--gray-9); }
+.screen-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
+.route-list { display: flex; flex-direction: column; gap: 8px; }
+.route-item { background: #fff; border: 1px solid var(--gray-2); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.route-item .info { flex: 1; min-width: 0; }
+.route-item .info h4 { margin: 0 0 2px 0; font-size: 14px; }
+.route-item .info p { margin: 0; font-size: 11px; color: var(--gray-6); }
+.route-item .actions { display: flex; gap: 4px; }
+.route-item .actions button { background: var(--gray-1); border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.route-item.disabled { opacity: 0.5; }
+.add-btn { background: var(--pink); color: white; border: none; padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 12px; box-shadow: 0 2px 6px rgba(239, 14, 116, 0.3); }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-6); margin-bottom: 4px; }
+.form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--gray-2); border-radius: 8px; font-size: 14px; font-family: inherit; background: white; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--pink); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-help { font-size: 11px; color: var(--gray-4); margin-top: 3px; }
+.toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.btn-row button { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; }
+.btn-primary { background: var(--pink); color: white; }
+.btn-secondary { background: var(--gray-1); color: var(--gray-9); }
+.btn-danger { background: #fee2e2; color: #991b1b; }
+.banner-info { background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 12px; }
+.banner-warn { background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 12px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--gray-9); color: white; padding: 12px 20px; border-radius: 999px; font-size: 13px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+.toast.show { opacity: 1; }
+.switch input:checked + .slider { background: var(--pink); }
+.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; transition: .3s; border-radius: 50%; }
+.switch input:checked + .slider:before { transform: translateX(22px); }
 </style>
 </head>
 <body>
 <div class="wrap">
-
+<div class="screen active" id="screen-home">
 <div class="hero">
-  <h1>✈️ Caça-passagem LATAM</h1>
-  <div class="sub">Última atualização: <span id="last-update"><span class="skeleton" style="width:80px"></span></span></div>
-  <div class="route">GRU (São Paulo) ➜ MCO (Orlando) em setembro/2026<br>Volta SFO ou LAX ➜ GRU 30 dias depois<br>1 adulto • econômica • pontos LATAM Pass</div>
-  <button class="refresh-btn" onclick="loadData(true)">↻ Atualizar agora</button>
+<div class="hero-text">
+<h1>✈️ Caça-passagem</h1>
+<div class="sub">Última atualização: <span id="last-update"><span class="skeleton" style="width:80px"></span></span></div>
+<div class="sub" style="margin-top:4px;">Monitorando <span id="route-count">—</span> rota(s) • 3x/dia</div>
 </div>
-
-<div class="promo-banner" id="promo-banner">🔥 PROMOÇÃO! Preço mais baixo registrado!</div>
-
-<div class="card">
-  <h2>🏆 Melhor combinação de hoje</h2>
-  <div class="deal">
-    <div class="leg">
-      <div class="label">IDA</div>
-      <div class="route-line">GRU ➜ MCO</div>
-      <div class="date" id="best-out-date"><span class="skeleton"></span></div>
-      <div class="meta" id="best-out-meta"><span class="skeleton"></span></div>
-      <div class="price" id="best-out-price"><span class="skeleton" style="width:120px"></span></div>
-    </div>
-    <div class="leg">
-      <div class="label">VOLTA</div>
-      <div class="route-line" id="best-ret-route">— ➜ GRU</div>
-      <div class="date" id="best-ret-date"><span class="skeleton"></span></div>
-      <div class="meta" id="best-ret-meta"><span class="skeleton"></span></div>
-      <div class="price" id="best-ret-price"><span class="skeleton" style="width:120px"></span></div>
-    </div>
-  </div>
-  <div class="total">
-    <div class="lbl">Total ida + volta</div>
-    <div class="val"><span id="total-miles">—</span> <span style="font-size:18px;font-weight:600;color:#6b7280;">milhas</span></div>
-    <div class="tax">+ taxas: <span id="total-cash">—</span></div>
-  </div>
-  <a class="cta" id="buy-link" href="https://www.latamairlines.com" target="_blank" rel="noopener">Ver na LATAM →</a>
+<div class="hero-actions">
+<button class="icon-btn" onclick="loadData(true)" title="Atualizar">↻</button>
+<button class="icon-btn" onclick="showScreen('routes')" title="Configurar rotas">⚙️</button>
 </div>
-
-<div class="card">
-  <h2>📉 Histórico de preços (milhas totais)</h2>
-  <div class="chart-wrap"><canvas id="price-chart"></canvas></div>
 </div>
-
-<div class="card">
-  <h2>📅 Buscas diárias</h2>
-  <table class="history-table">
-    <thead>
-      <tr>
-        <th>Busca</th>
-        <th>Ida</th>
-        <th>Volta</th>
-        <th>Total</th>
-        <th>Taxas</th>
-      </tr>
-    </thead>
-    <tbody id="history-body"></tbody>
-  </table>
-</div>
-
+<div id="routes-container"></div>
 <div class="status" id="status"></div>
-
-<div class="foot">
-  Preços públicos LATAM Pass • Sujeitos a alteração<br>
-  Dados atualizados diariamente às 09:00 (horário de Brasília)
+<div class="foot">Preços públicos LATAM Pass • Sujeitos a alteração<br>Buscas automáticas: 🌙 madrugada (3h) • ☀️ manhã (11h) • 🌃 noite (21h) — Brasília</div>
 </div>
-
+<div class="screen" id="screen-routes">
+<div class="screen-header"><button class="back-btn" onclick="showScreen('home')">←</button><h2>⚙️ Configurar Rotas</h2></div>
+<div class="banner-info" id="banner-token-missing" style="display:none;">🔑 Pra salvar mudanças, configure seu Token GitHub <a href="#" onclick="showScreen('token');return false;" style="color:#1e40af;text-decoration:underline;">aqui</a></div>
+<div class="route-list" id="route-list-container"></div>
+<button class="add-btn" onclick="editRoute(null)">+ Nova Rota</button>
+<div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--gray-1);"><button class="btn-secondary" style="padding:10px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%;" onclick="showScreen('token')">🔑 Configurar Token GitHub</button></div>
 </div>
-
-<div class="install-prompt" id="install-prompt">
-  <span>📲 Instalar no celular pra acesso rápido?</span>
-  <button onclick="doInstall()">Instalar</button>
+<div class="screen" id="screen-edit-route">
+<div class="screen-header"><button class="back-btn" onclick="showScreen('routes')">←</button><h2 id="edit-route-title">Nova Rota</h2></div>
+<form id="route-form" onsubmit="saveRoute(event)">
+<div class="form-group"><label>Nome da rota</label><input type="text" id="f-name" required maxlength="40" placeholder="Ex: Férias em Orlando"><div class="form-help">Pra você identificar (qualquer texto)</div></div>
+<h3 style="font-size:13px;color:var(--gray-6);text-transform:uppercase;margin:20px 0 8px;">✈️ Ida</h3>
+<div class="form-row"><div class="form-group"><label>Origem</label><input type="text" id="f-outFrom" required maxlength="3" placeholder="GRU" style="text-transform:uppercase;"><div class="form-help">Código IATA (3 letras)</div></div><div class="form-group"><label>Destino</label><input type="text" id="f-outTo" required maxlength="3" placeholder="MCO" style="text-transform:uppercase;"><div class="form-help">Código IATA (3 letras)</div></div></div>
+<h3 style="font-size:13px;color:var(--gray-6);text-transform:uppercase;margin:20px 0 8px;">🔁 Volta</h3>
+<div class="form-group"><label>De onde sai a volta?</label><select id="f-retType" onchange="onRetTypeChange()"><option value="same">Mesmo lugar do destino (ida e volta simples)</option><option value="other">Outro aeroporto (open-jaw)</option></select></div>
+<div class="form-group" id="f-retFrom-group" style="display:none;"><label>Aeroporto de volta</label><input type="text" id="f-retFrom" maxlength="20" placeholder="SFO" style="text-transform:uppercase;"><div class="form-help">Pode adicionar opções alternativas separadas por vírgula (ex: SFO, LAX)</div></div>
+<h3 style="font-size:13px;color:var(--gray-6);text-transform:uppercase;margin:20px 0 8px;">📅 Quando</h3>
+<div class="form-row"><div class="form-group"><label>Mês da ida</label><input type="month" id="f-month" required></div><div class="form-group"><label>Dias de viagem</label><input type="number" id="f-tripDays" required min="1" max="365" value="14"><div class="form-help">Volta = ida + N dias</div></div></div>
+<h3 style="font-size:13px;color:var(--gray-6);text-transform:uppercase;margin:20px 0 8px;">👥 Passageiros</h3>
+<div class="form-row"><div class="form-group"><label>Quantidade</label><input type="number" id="f-passengers" required min="1" max="9" value="1"></div><div class="form-group"><label>Classe</label><select id="f-cabin"><option value="Economy">Econômica</option><option value="PremiumEconomy">Premium Economy</option><option value="Business">Executiva</option></select></div></div>
+<div class="toggle-row"><div><strong style="font-size:13px;">Pagar com pontos (LATAM Pass)</strong><div style="font-size:11px;color:var(--gray-6);">Desligue se quer ver em dinheiro</div></div><label class="switch" style="position:relative;display:inline-block;width:48px;height:26px;"><input type="checkbox" id="f-redemption" checked style="opacity:0;width:0;height:0;"><span class="slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;transition:.3s;border-radius:26px;"></span></label></div>
+<div class="toggle-row"><div><strong style="font-size:13px;">Rota ativa</strong><div style="font-size:11px;color:var(--gray-6);">Desligue pra pausar buscas dessa rota</div></div><label class="switch" style="position:relative;display:inline-block;width:48px;height:26px;"><input type="checkbox" id="f-enabled" checked style="opacity:0;width:0;height:0;"><span class="slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;transition:.3s;border-radius:26px;"></span></label></div>
+<div class="btn-row"><button type="button" class="btn-secondary" onclick="showScreen('routes')">Cancelar</button><button type="submit" class="btn-primary">Salvar</button></div>
+<button type="button" id="delete-route-btn" class="btn-danger" style="margin-top:10px;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;width:100%;display:none;" onclick="deleteCurrentRoute()">🗑️ Remover esta rota</button>
+</form>
 </div>
-
+<div class="screen" id="screen-token">
+<div class="screen-header"><button class="back-btn" onclick="showScreen('routes')">←</button><h2>🔑 Token GitHub</h2></div>
+<div class="banner-warn">⚠️ O token fica salvo APENAS neste celular (localStorage). Nunca compartilhe.</div>
+<div class="form-group"><label>Personal Access Token (PAT)</label><input type="password" id="f-token" placeholder="ghp_... ou github_pat_..." style="font-family:monospace;font-size:12px;"><div class="form-help">Token com permissão de escrita no repositório <strong>carlaobh20/cacapassagens</strong></div></div>
+<details style="margin-top: 16px;"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--pink);">📖 Como criar o token (3 min)</summary><ol style="font-size:12px;color:var(--gray-6);line-height:1.7;padding-left:20px;"><li>Abra <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens</a> (Fine-grained tokens)</li><li>Clique <strong>Generate new token</strong></li><li>Nome: <strong>cacapassagens-pwa</strong></li><li>Expiração: 1 ano ou No expiration</li><li>Repository access → <strong>Only select repositories</strong> → escolha <code>cacapassagens</code></li><li>Permissions → <strong>Repository permissions</strong> → procure <strong>Contents</strong> → mude pra <strong>Read and write</strong></li><li>Clique <strong>Generate token</strong></li><li>Copie o token (ghp_... ou github_pat_...) e cole aqui em cima</li></ol></details>
+<div class="btn-row"><button type="button" class="btn-danger" onclick="clearToken()">🗑️ Remover token</button><button type="button" class="btn-primary" onclick="saveToken()">Salvar</button></div>
+<div id="token-status" style="margin-top:14px;font-size:12px;text-align:center;"></div>
+</div>
+</div>
+<div class="install-prompt" id="install-prompt"><span>📲 Instalar no celular pra acesso rápido?</span><button onclick="doInstall()">Instalar</button></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
-fetch("./config.json").then(r => r.json()).then(cfg => {
+fetch('./config.json').then(r => r.json()).then(cfg => {
   if (!cfg.oneSignalAppId) return;
   window.OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: cfg.oneSignalAppId,
-      allowLocalhostAsSecureOrigin: true,
-      serviceWorkerPath: "sw.js",
-      serviceWorkerParam: { scope: "/" }
-    });
+    await OneSignal.init({ appId: cfg.oneSignalAppId, allowLocalhostAsSecureOrigin: true, serviceWorkerPath: 'sw.js', serviceWorkerParam: { scope: '/' } });
     setTimeout(() => OneSignal.Slidedown.promptPush(), 3000);
   });
 }).catch(() => {});
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
 <script>
-let chart = null;
-let installPromptEvent = null;
-
-function fmtDate(yyyymmdd) {
-  if (!yyyymmdd) return '—';
-  const [y, m, d] = yyyymmdd.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function fmtMiles(n) {
-  return (n || 0).toLocaleString('pt-BR');
-}
-
-function fmtBRL(n) {
-  return 'R$ ' + (n || 0).toFixed(2).replace('.', ',');
-}
-
-async function loadData(forceFresh = false) {
-  const statusEl = document.getElementById('status');
-  statusEl.className = 'status';
-  statusEl.textContent = 'Carregando dados...';
-
-  try {
-    const url = './data.json' + (forceFresh ? '?t=' + Date.now() : '');
-    const res = await fetch(url, { cache: forceFresh ? 'no-store' : 'default' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    render(data);
-    statusEl.textContent = '';
-  } catch (e) {
-    statusEl.className = 'status error';
-    statusEl.textContent = 'Erro ao carregar: ' + e.message + '. Mostrando dados em cache.';
-    // Service worker fallback handles cache automatically
-  }
-}
-
-function render(data) {
-  const history = data.history || [];
-  if (history.length === 0) {
-    document.getElementById('status').textContent = 'Nenhum dado ainda. Aguarde a primeira busca diária.';
-    return;
-  }
-
-  const latest = history[history.length - 1];
-
-  // Last update
-  document.getElementById('last-update').textContent = fmtDate(latest.date);
-
-  // Best outbound
-  document.getElementById('best-out-date').textContent = latest.out.dateLabel || fmtDate(latest.out.depDate);
-  document.getElementById('best-out-meta').textContent = `${latest.out.time} • ${latest.out.stopsLabel} • ${latest.out.duration}`;
-  document.getElementById('best-out-price').innerHTML = `${fmtMiles(latest.out.miles)} <small>milhas + ${fmtBRL(latest.out.cashBRL)}</small>`;
-
-  // Best return
-  document.getElementById('best-ret-route').textContent = `${latest.ret.from} ➜ GRU`;
-  document.getElementById('best-ret-date').textContent = latest.ret.dateLabel || fmtDate(latest.ret.depDate);
-  document.getElementById('best-ret-meta').textContent = `${latest.ret.time} • ${latest.ret.stopsLabel} • ${latest.ret.duration}`;
-  document.getElementById('best-ret-price').innerHTML = `${fmtMiles(latest.ret.miles)} <small>milhas + ${fmtBRL(latest.ret.cashBRL)}</small>`;
-
-  // Total
-  document.getElementById('total-miles').textContent = fmtMiles(latest.totalMiles);
-  document.getElementById('total-cash').textContent = fmtBRL(latest.totalCashBRL);
-
-  // Buy link
-  const outUrl = `https://www.latamairlines.com/br/pt/oferta-voos?origin=${latest.out.from}&destination=${latest.out.to}&outbound=${latest.out.depDate}T12%3A00%3A00.000Z&adt=1&inf=0&chd=0&trip=OW&cabin=Economy&redemption=true&sort=RECOMMENDED`;
-  document.getElementById('buy-link').href = outUrl;
-
-  // Promo check
-  if (history.length >= 2) {
-    const todayTotal = latest.totalMiles;
-    const allMins = history.slice(0, -1).map(h => h.totalMiles);
-    const prevMin = Math.min(...allMins);
-    if (todayTotal < prevMin) {
-      document.getElementById('promo-banner').classList.add('show');
-      document.getElementById('promo-banner').textContent = `🔥 NOVO MÍNIMO HISTÓRICO! ${fmtMiles(prevMin - todayTotal)} milhas a menos que antes`;
-    } else if (todayTotal < prevMin * 0.95) {
-      document.getElementById('promo-banner').classList.add('show');
-      document.getElementById('promo-banner').textContent = `🔥 Preço caiu mais de 5%!`;
-    }
-  }
-
-  // Chart
-  if (chart) chart.destroy();
-  const ctx = document.getElementById('price-chart').getContext('2d');
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: history.map(h => h.date.slice(5)),
-      datasets: [{
-        label: 'Total em milhas',
-        data: history.map(h => h.totalMiles),
-        borderColor: '#ef0e74',
-        backgroundColor: 'rgba(239, 14, 116, 0.1)',
-        tension: 0.3,
-        fill: true,
-        pointRadius: 4,
-        pointHoverRadius: 7,
-        borderWidth: 2.5
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: false,
-          ticks: { callback: v => (v/1000).toFixed(0) + 'k', font: { size: 11 } }
-        },
-        x: { ticks: { font: { size: 11 } } }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => fmtMiles(ctx.parsed.y) + ' milhas'
-          }
-        }
-      }
-    }
-  });
-
-  // History table
-  const tbody = document.getElementById('history-body');
-  tbody.innerHTML = '';
-  history.slice().reverse().slice(0, 14).forEach(h => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${fmtDate(h.date)}</td>
-      <td>${fmtDate(h.out.depDate)}<br><small style="color:#9ca3af">${fmtMiles(h.out.miles)} mi</small></td>
-      <td>${h.ret.from} ${fmtDate(h.ret.depDate)}<br><small style="color:#9ca3af">${fmtMiles(h.ret.miles)} mi</small></td>
-      <td>${fmtMiles(h.totalMiles)}</td>
-      <td>${fmtBRL(h.totalCashBRL)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// PWA install prompt
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  installPromptEvent = e;
-  if (!window.matchMedia('(display-mode: standalone)').matches) {
-    document.getElementById('install-prompt').classList.add('show');
-  }
-});
-
-function doInstall() {
-  if (installPromptEvent) {
-    installPromptEvent.prompt();
-    installPromptEvent.userChoice.then(() => {
-      document.getElementById('install-prompt').classList.remove('show');
-      installPromptEvent = null;
-    });
-  }
-}
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW reg failed', err));
-  });
-}
-
-// Initial load
-loadData();
-
-// Refresh on tab focus (in case data updated)
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) loadData(true);
-});
+const GH_OWNER='carlaobh20',GH_REPO='cacapassagens',GH_BRANCH='main',ROUTES_PATH='pwa-latam/routes.json';
+let routesData={routes:[]},priceData={routes:{}},chartInstances={},editingRouteId=null,installPromptEvent=null;
+function fmtDate(s){if(!s)return'—';const p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function fmtDateTime(iso){if(!iso)return'—';const p=iso.split('T');return fmtDate(p[0])+(p[1]?' às '+p[1]:'');}
+function slotEmoji(s){return s==='madrugada'?'🌙':s==='manha'?'☀️':s==='noite'?'🌃':'';}
+function fmtMiles(n){return(n||0).toLocaleString('pt-BR');}
+function fmtBRL(n){return'R$ '+(n||0).toFixed(2).replace('.',',');}
+function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+name).classList.add('active');window.scrollTo(0,0);if(name==='routes')renderRouteList();if(name==='token')document.getElementById('f-token').value=localStorage.getItem('gh_token')||'';document.getElementById('banner-token-missing').style.display=localStorage.getItem('gh_token')?'none':'block';}
+function toast(msg,ms){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),ms||2500);}
+function genId(n){return(n||'rota').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,30)+'-'+Date.now().toString(36).slice(-4);}
+async function loadAll(f){const s=document.getElementById('status');s.className='status';s.textContent='Carregando...';try{const qs=f?'?t='+Date.now():'';const[rRes,dRes]=await Promise.all([fetch('./routes.json'+qs,{cache:f?'no-store':'default'}),fetch('./data.json'+qs,{cache:f?'no-store':'default'})]);routesData=await rRes.json();priceData=await dRes.json();renderHome();s.textContent='';}catch(e){s.className='status error';s.textContent='Erro: '+e.message;}}
+function loadData(f){loadAll(f);}
+function renderHome(){const routes=(routesData.routes||[]).filter(r=>r.enabled!==false);document.getElementById('route-count').textContent=routes.length;let latestTs='';for(const route of routes){const h=(priceData.routes&&priceData.routes[route.id]&&priceData.routes[route.id].history)||[];const last=h[h.length-1];if(last&&(!latestTs||last.timestamp>latestTs))latestTs=last.timestamp;}document.getElementById('last-update').textContent=latestTs?fmtDateTime(latestTs):'—';const container=document.getElementById('routes-container');container.innerHTML='';if(routes.length===0){container.innerHTML='<div class="card empty">Nenhuma rota cadastrada. Clique em ⚙️ pra adicionar.</div>';return;}routes.forEach(route=>{const history=(priceData.routes&&priceData.routes[route.id]&&priceData.routes[route.id].history)||[];const latest=history[history.length-1];const card=document.createElement('div');card.className='card route-card';if(!latest){card.innerHTML='<h3>'+(route.name||(route.outboundFrom+' → '+route.outboundTo))+'</h3><div class="route-line">'+route.outboundFrom+' → '+route.outboundTo+' • '+route.month+' • '+route.tripDays+' dias</div><div class="empty">Aguardando primeira busca...</div>';container.appendChild(card);return;}let promoTag='';if(history.length>=2){const prev=Math.min(...history.slice(0,-1).map(h=>h.totalMiles));if(latest.totalMiles<prev)promoTag='<span class="promo-badge">🔥 mín histórico!</span>';else if(latest.totalMiles<prev*0.95)promoTag='<span class="promo-badge">🔥 -5%</span>';}const slot=slotEmoji(latest.slot);const outUrl='https://www.latamairlines.com/br/pt/oferta-voos?origin='+latest.out.from+'&destination='+latest.out.to+'&outbound='+latest.out.depDate+'T12%3A00%3A00.000Z&adt='+(route.passengers||1)+'&inf=0&chd=0&trip=OW&cabin='+(route.cabin||'Economy')+'&redemption='+(route.redemption!==false)+'&sort=RECOMMENDED';card.innerHTML='<h3><span>'+(route.name||(route.outboundFrom+' → '+route.outboundTo))+'</span>'+promoTag+'</h3><div class="route-line">'+slot+' '+fmtDateTime(latest.timestamp)+'</div><div class="deal"><div class="leg"><div class="label">IDA</div><div class="route-line">'+latest.out.from+' → '+latest.out.to+'</div><div class="date">'+(latest.out.dateLabel||fmtDate(latest.out.depDate))+'</div><div class="meta">'+(latest.out.time||'')+' • '+(latest.out.stopsLabel||'')+' • '+(latest.out.duration||'')+'</div><div class="price">'+fmtMiles(latest.out.miles)+'<small>milhas + '+fmtBRL(latest.out.cashBRL)+'</small></div></div><div class="leg"><div class="label">VOLTA</div><div class="route-line">'+latest.ret.from+' → '+latest.ret.to+'</div><div class="date">'+(latest.ret.dateLabel||fmtDate(latest.ret.depDate))+'</div><div class="meta">'+(latest.ret.time||'')+' • '+(latest.ret.stopsLabel||'')+' • '+(latest.ret.duration||'')+'</div><div class="price">'+fmtMiles(latest.ret.miles)+'<small>milhas + '+fmtBRL(latest.ret.cashBRL)+'</small></div></div></div><div class="total"><div><div class="lbl">Total ida + volta</div><div class="val">'+fmtMiles(latest.totalMiles)+' <span style="font-size:13px;font-weight:600;color:var(--gray-6);">milhas</span></div><div class="tax">+ taxas: '+fmtBRL(latest.totalCashBRL)+'</div></div><a class="cta" href="'+outUrl+'" target="_blank" rel="noopener">Ver na LATAM →</a></div><div class="chart-wrap"><canvas id="chart-'+route.id+'"></canvas></div>';container.appendChild(card);if(history.length>1){const ctx=document.getElementById('chart-'+route.id).getContext('2d');if(chartInstances[route.id])chartInstances[route.id].destroy();chartInstances[route.id]=new Chart(ctx,{type:'line',data:{labels:history.map(h=>h.timestamp?h.timestamp.slice(5,16).replace('T',' '):h.date.slice(5)),datasets:[{data:history.map(h=>h.totalMiles),borderColor:'#ef0e74',backgroundColor:'rgba(239,14,116,0.1)',tension:0.3,fill:true,pointRadius:3,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:false,ticks:{callback:v=>(v/1000).toFixed(0)+'k',font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:0}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtMiles(c.parsed.y)+' milhas'}}}}});}});}
+function renderRouteList(){const list=document.getElementById('route-list-container');list.innerHTML='';const routes=routesData.routes||[];if(routes.length===0){list.innerHTML='<div class="empty">Nenhuma rota cadastrada ainda.</div>';return;}routes.forEach(r=>{const el=document.createElement('div');el.className='route-item'+(r.enabled===false?' disabled':'');const returnDesc=r.returnFrom&&r.returnFrom!==r.outboundTo?r.returnFrom+' → '+(r.returnTo||r.outboundFrom):'ida e volta';el.innerHTML='<div class="info"><h4>'+(r.name||(r.outboundFrom+' → '+r.outboundTo))+'</h4><p>'+r.outboundFrom+' → '+r.outboundTo+' • '+returnDesc+' • '+r.month+' • '+r.tripDays+' dias</p></div><div class="actions"><button onclick="editRoute(\''+r.id+'\')" title="Editar">✏️</button></div>';list.appendChild(el);});}
+function editRoute(routeId){editingRouteId=routeId;const isNew=!routeId;document.getElementById('edit-route-title').textContent=isNew?'Nova Rota':'Editar Rota';document.getElementById('delete-route-btn').style.display=isNew?'none':'block';let r={name:'',outboundFrom:'GRU',outboundTo:'',returnFrom:'',month:'',tripDays:14,passengers:1,cabin:'Economy',redemption:true,enabled:true};if(!isNew)r=routesData.routes.find(x=>x.id===routeId)||r;document.getElementById('f-name').value=r.name||'';document.getElementById('f-outFrom').value=r.outboundFrom||'';document.getElementById('f-outTo').value=r.outboundTo||'';const retFromCombined=r.returnToCandidates&&r.returnToCandidates.length?r.returnToCandidates.join(', '):(r.returnFrom||'');const isSame=!r.returnFrom||r.returnFrom===r.outboundTo;document.getElementById('f-retType').value=isSame?'same':'other';document.getElementById('f-retFrom').value=isSame?'':retFromCombined;document.getElementById('f-month').value=r.month||'';document.getElementById('f-tripDays').value=r.tripDays||14;document.getElementById('f-passengers').value=r.passengers||1;document.getElementById('f-cabin').value=r.cabin||'Economy';document.getElementById('f-redemption').checked=r.redemption!==false;document.getElementById('f-enabled').checked=r.enabled!==false;onRetTypeChange();showScreen('edit-route');}
+function onRetTypeChange(){document.getElementById('f-retFrom-group').style.display=document.getElementById('f-retType').value==='other'?'block':'none';}
+async function saveRoute(event){event.preventDefault();const name=document.getElementById('f-name').value.trim(),outFrom=document.getElementById('f-outFrom').value.trim().toUpperCase(),outTo=document.getElementById('f-outTo').value.trim().toUpperCase(),retType=document.getElementById('f-retType').value,retFromRaw=document.getElementById('f-retFrom').value.trim().toUpperCase(),month=document.getElementById('f-month').value,tripDays=parseInt(document.getElementById('f-tripDays').value,10),passengers=parseInt(document.getElementById('f-passengers').value,10),cabin=document.getElementById('f-cabin').value,redemption=document.getElementById('f-redemption').checked,enabled=document.getElementById('f-enabled').checked;let returnFrom,returnToCandidates;if(retType==='same'){returnFrom=outTo;returnToCandidates=[outTo];}else{if(!retFromRaw){toast('Informe o aeroporto da volta');return;}returnToCandidates=retFromRaw.split(',').map(s=>s.trim()).filter(Boolean);returnFrom=returnToCandidates[0];}const routeObj={id:editingRouteId||genId(name),name,outboundFrom:outFrom,outboundTo:outTo,returnFrom,returnToCandidates,returnTo:outFrom,month,tripDays,passengers,cabin,redemption,enabled,updatedAt:new Date().toISOString().slice(0,10)};if(!editingRouteId)routeObj.createdAt=routeObj.updatedAt;if(editingRouteId){const idx=routesData.routes.findIndex(x=>x.id===editingRouteId);routesData.routes[idx]=Object.assign({},routesData.routes[idx],routeObj);}else{routesData.routes.push(routeObj);}routesData.updatedAt=new Date().toISOString().slice(0,10);await pushRoutesToGitHub();}
+async function deleteCurrentRoute(){if(!editingRouteId)return;if(!confirm('Remover esta rota? Não poderá ser desfeito.'))return;routesData.routes=routesData.routes.filter(r=>r.id!==editingRouteId);routesData.updatedAt=new Date().toISOString().slice(0,10);await pushRoutesToGitHub();}
+async function pushRoutesToGitHub(){const token=localStorage.getItem('gh_token');if(!token){toast('⚠️ Configure o token GitHub primeiro');showScreen('token');return;}try{const url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+ROUTES_PATH;const getRes=await fetch(url+'?ref='+GH_BRANCH,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}});if(!getRes.ok)throw new Error('Erro lendo arquivo: '+getRes.status);const getJson=await getRes.json();const sha=getJson.sha;const cleanData={_README:'Lista de rotas monitoradas pelo Caça-passagem. Editado via PWA.',version:2,updatedAt:routesData.updatedAt,routes:routesData.routes};const newContent=JSON.stringify(cleanData,null,2);const b64=btoa(unescape(encodeURIComponent(newContent)));const putRes=await fetch(url,{method:'PUT',headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({message:'Update routes via PWA',content:b64,sha,branch:GH_BRANCH})});if(!putRes.ok){const err=await putRes.json();throw new Error('GitHub: '+(err.message||putRes.status));}toast('✅ Rota salva!');setTimeout(()=>{showScreen('home');loadAll(true);},1500);}catch(e){toast('❌ '+e.message,4000);}}
+function saveToken(){const t=document.getElementById('f-token').value.trim();if(!t){toast('Cole o token primeiro');return;}localStorage.setItem('gh_token',t);document.getElementById('token-status').textContent='✅ Token salvo';document.getElementById('token-status').style.color='green';toast('🔑 Token salvo no celular');document.getElementById('banner-token-missing').style.display='none';}
+function clearToken(){if(!confirm('Remover token salvo?'))return;localStorage.removeItem('gh_token');document.getElementById('f-token').value='';document.getElementById('token-status').textContent='🗑️ Token removido';document.getElementById('token-status').style.color='#dc2626';document.getElementById('banner-token-missing').style.display='block';}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPromptEvent=e;if(!window.matchMedia('(display-mode: standalone)').matches){document.getElementById('install-prompt').classList.add('show');}});
+function doInstall(){if(installPromptEvent){installPromptEvent.prompt();installPromptEvent.userChoice.then(()=>{document.getElementById('install-prompt').classList.remove('show');installPromptEvent=null;});}}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW reg failed',err));});}
+loadAll();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadAll(true);});
 </script>
 </body>
 </html>
