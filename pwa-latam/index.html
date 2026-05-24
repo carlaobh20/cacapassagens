@@ -101,6 +101,7 @@ button { font-family: inherit; }
 </div>
 <div class="hero-actions">
 <button class="icon-btn" onclick="loadData(true)" title="Atualizar">↻</button>
+<button class="icon-btn" id="search-now-btn" onclick="manualSearch()" title="Buscar agora" style="background:rgba(255,255,255,0.3);">🔄</button>
 <button class="icon-btn" onclick="showScreen('routes')" title="Configurar rotas">⚙️</button>
 </div>
 </div>
@@ -181,6 +182,38 @@ function saveToken(){const t=document.getElementById('f-token').value.trim();if(
 function clearToken(){if(!confirm('Remover token salvo?'))return;localStorage.removeItem('gh_token');document.getElementById('f-token').value='';document.getElementById('token-status').textContent='🗑️ Token removido';document.getElementById('token-status').style.color='#dc2626';document.getElementById('banner-token-missing').style.display='block';}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPromptEvent=e;if(!window.matchMedia('(display-mode: standalone)').matches){document.getElementById('install-prompt').classList.add('show');}});
 function doInstall(){if(installPromptEvent){installPromptEvent.prompt();installPromptEvent.userChoice.then(()=>{document.getElementById('install-prompt').classList.remove('show');installPromptEvent=null;});}}
+async function manualSearch(){
+  const token=localStorage.getItem('gh_token');
+  if(!token){toast('⚠️ Configure o token GitHub primeiro');showScreen('token');return;}
+  const btn=document.getElementById('search-now-btn');
+  if(btn._busy){toast('⏳ Busca em andamento...');return;}
+  btn._busy=true;
+  const originalText=btn.textContent;
+  btn.textContent='⏳';
+  toast('🚀 Disparando busca... aguarde 2-3min',5000);
+  try{
+    const url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/actions/workflows/manual-search.yml/dispatches';
+    const res=await fetch(url,{method:'POST',headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({ref:GH_BRANCH})});
+    if(!res.ok){const t=await res.text();throw new Error('GitHub: '+res.status+' '+t);}
+    toast('✅ Busca iniciada! Vou recarregar em ~3min',6000);
+    let tries=0;
+    const startTime=Date.now();
+    const poll=setInterval(async()=>{
+      tries++;
+      try{
+        const dr=await fetch('./data.json?t='+Date.now(),{cache:'no-store'});
+        const d=await dr.json();
+        const hasNew=Object.values(d.routes||{}).some(r=>(r.history||[]).some(h=>h.source==='manual-search'&&new Date(h.timestamp).getTime()>startTime-300000));
+        if(hasNew){clearInterval(poll);btn.textContent=originalText;btn._busy=false;toast('🎉 Busca concluída!');loadAll(true);}
+      }catch(e){}
+      if(tries>=8){clearInterval(poll);btn.textContent=originalText;btn._busy=false;toast('⏰ Timeout. Veja GitHub Actions pra ver status.',4000);}
+    },30000);
+  }catch(e){
+    btn.textContent=originalText;btn._busy=false;
+    toast('❌ '+e.message,5000);
+  }
+}
+
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW reg failed',err));});}
 loadAll();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadAll(true);});
