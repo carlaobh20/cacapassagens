@@ -260,6 +260,459 @@ body {
   <button onclick="doInstall()">Instalar</button>
 </div>
 
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+fetch("./config.json").then(r => r.json()).then(cfg => {
+  if (!cfg.oneSignalAppId) return;
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: cfg.oneSignalAppId,
+      allowLocalhostAsSecureOrigin: true,
+      serviceWorkerPath: "sw.js",
+      serviceWorkerParam: { scope: "/" }
+    });
+    setTimeout(() => OneSignal.Slidedown.promptPush(), 3000);
+  });
+}).catch(() => {});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<script>
+let chart = null;
+let installPromptEvent = null;
+
+function fmtDate(yyyymmdd) {
+  if (!yyyymmdd) return '—';
+  const [y, m, d] = yyyymmdd.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fmtMiles(n) {
+  return (n || 0).toLocaleString('pt-BR');
+}
+
+function fmtBRL(n) {
+  return 'R$ ' + (n || 0).toFixed(2).replace('.', ',');
+}
+
+async function loadData(forceFresh = false) {
+  const statusEl = document.getElementById('status');
+  statusEl.className = 'status';
+  statusEl.textContent = 'Carregando dados...';
+
+  try {
+    const url = './data.json' + (forceFresh ? '?t=' + Date.now() : '');
+    const res = await fetch(url, { cache: forceFresh ? 'no-store' : 'default' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    render(data);
+    statusEl.textContent = '';
+  } catch (e) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Erro ao carregar: ' + e.message + '. Mostrando dados em cache.';
+    // Service worker fallback handles cache automatically
+  }
+}
+
+function render(data) {
+  const history = data.history || [];
+  if (history.length === 0) {
+    document.getElementById('status').textContent = 'Nenhum dado ainda. Aguarde a primeira busca diária.';
+    return;
+  }
+
+  const latest = history[history.length - 1];
+
+  // Last update
+  document.getElementById('last-update').textContent = fmtDate(latest.date);
+
+  // Best outbound
+  document.getElementById('best-out-date').textContent = latest.out.dateLabel || fmtDate(latest.out.depDate);
+  document.getElementById('best-out-meta').textContent = `${latest.out.time} • ${latest.out.stopsLabel} • ${latest.out.duration}`;
+  document.getElementById('best-out-price').innerHTML = `${fmtMiles(latest.out.miles)} <small>milhas + ${fmtBRL(latest.out.cashBRL)}</small>`;
+
+  // Best return
+  document.getElementById('best-ret-route').textContent = `${latest.ret.from} ➜ GRU`;
+  document.getElementById('best-ret-date').textContent = latest.ret.dateLabel || fmtDate(latest.ret.depDate);
+  document.getElementById('best-ret-meta').textContent = `${latest.ret.time} • ${latest.ret.stopsLabel} • ${latest.ret.duration}`;
+  document.getElementById('best-ret-price').innerHTML = `${fmtMiles(latest.ret.miles)} <small>milhas + ${fmtBRL(latest.ret.cashBRL)}</small>`;
+
+  // Total
+  document.getElementById('total-miles').textContent = fmtMiles(latest.totalMiles);
+  document.getElementById('total-cash').textContent = fmtBRL(latest.totalCashBRL);
+
+  // Buy link
+  const outUrl = `https://www.latamairlines.com/br/pt/oferta-voos?origin=${latest.out.from}&destination=${latest.out.to}&outbound=${latest.out.depDate}T12%3A00%3A00.000Z&adt=1&inf=0&chd=0&trip=OW&cabin=Economy&redemption=true&sort=RECOMMENDED`;
+  document.getElementById('buy-link').href = outUrl;
+
+  // Promo check
+  if (history.length >= 2) {
+    const todayTotal = latest.totalMiles;
+    const allMins = history.slice(0, -1).map(h => h.totalMiles);
+    const prevMin = Math.min(...allMins);
+    if (todayTotal < prevMin) {
+      document.getElementById('promo-banner').classList.add('show');
+      document.getElementById('promo-banner').textContent = `🔥 NOVO MÍNIMO HISTÓRICO! ${fmtMiles(prevMin - todayTotal)} milhas a menos que antes`;
+    } else if (todayTotal < prevMin * 0.95) {
+      document.getElementById('promo-banner').classList.add('show');
+      document.getElementById('promo-banner').textContent = `🔥 Preço caiu mais de 5%!`;
+    }
+  }
+
+  // Chart
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('price-chart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: history.map(h => h.date.slice(5)),
+      datasets: [{
+        label: 'Total em milhas',
+        data: history.map(h => h.totalMiles),
+        borderColor: '#ef0e74',
+        backgroundColor: 'rgba(239, 14, 116, 0.1)',
+        tension: 0.3,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: false,
+          ticks: { callback: v => (v/1000).toFixed(0) + 'k', font: { size: 11 } }
+        },
+        x: { ticks: { font: { size: 11 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => fmtMiles(ctx.parsed.y) + ' milhas'
+          }
+        }
+      }
+    }
+  });
+
+  // History table
+  const tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+  history.slice().reverse().slice(0, 14).forEach(h => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fmtDate(h.date)}</td>
+      <td>${fmtDate(h.out.depDate)}<br><small style="color:#9ca3af">${fmtMiles(h.out.miles)} mi</small></td>
+      <td>${h.ret.from} ${fmtDate(h.ret.depDate)}<br><small style="color:#9ca3af">${fmtMiles(h.ret.miles)} mi</small></td>
+      <td>${fmtMiles(h.totalMiles)}</td>
+      <td>${fmtBRL(h.totalCashBRL)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// PWA install prompt
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPromptEvent = e;
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
+    document.getElementById('install-prompt').classList.add('show');
+  }
+});
+
+function doInstall() {
+  if (installPromptEvent) {
+    installPromptEvent.prompt();
+    installPromptEvent.userChoice.then(() => {
+      document.getElementById('install-prompt').classList.remove('show');
+      installPromptEvent = null;
+    });
+  }
+}
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW reg failed', err));
+  });
+}
+
+// Initial load
+loadData();
+
+// Refresh on tab focus (in case data updated)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) loadData(true);
+});
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ef0e74">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Caça-passagem">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<title>Caça-passagem LATAM • GRU ↔ Orlando</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f9fafb;
+  color: #1f2937;
+  line-height: 1.5;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.wrap { max-width: 920px; margin: 0 auto; padding: 12px; }
+.hero {
+  background: linear-gradient(135deg, #ef0e74 0%, #6f1ab1 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(239, 14, 116, 0.15);
+}
+.hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; }
+.hero .sub { font-size: 12px; opacity: 0.92; }
+.hero .route { font-size: 13px; margin-top: 8px; opacity: 0.95; line-height: 1.4; }
+.refresh-btn {
+  background: rgba(255,255,255,0.18);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.refresh-btn:active { background: rgba(255,255,255,0.3); }
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.card h2 {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  font-weight: 600;
+}
+.deal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 600px) { .deal { grid-template-columns: 1fr; } }
+.leg {
+  background: #fafafa;
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.leg .label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+.leg .route-line { font-size: 17px; font-weight: 700; margin: 4px 0 2px; color: #111827; }
+.leg .date { font-size: 12px; color: #6b7280; }
+.leg .price { font-size: 22px; font-weight: 800; color: #ef0e74; margin-top: 8px; line-height: 1.1; }
+.leg .price small { font-size: 12px; font-weight: 500; color: #6b7280; display: block; margin-top: 2px; }
+.leg .meta { font-size: 11px; color: #6b7280; margin-top: 4px; }
+.total {
+  background: linear-gradient(90deg, #fdf2f8, #faf5ff);
+  border: 1px solid #f9a8d4;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+.total .lbl { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+.total .val { font-size: 26px; font-weight: 800; color: #6f1ab1; line-height: 1.1; margin-top: 2px; }
+.total .tax { font-size: 13px; color: #6b7280; font-weight: 500; }
+.cta {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  padding: 13px 18px;
+  background: #ef0e74;
+  color: white !important;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(239, 14, 116, 0.3);
+}
+.cta:active { background: #d10c66; }
+.chart-wrap { position: relative; height: 200px; }
+.history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.history-table th, .history-table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.history-table th { color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table td:nth-child(4) { font-weight: 700; color: #6f1ab1; }
+.empty { color: #9ca3af; font-size: 13px; font-style: italic; padding: 20px; text-align: center; }
+.promo-banner {
+  background: linear-gradient(90deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #92400e;
+  font-weight: 600;
+  display: none;
+}
+.promo-banner.show { display: block; animation: pulse 2s infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+.status {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  margin: 8px 0;
+}
+.status.error { color: #dc2626; }
+.foot {
+  font-size: 10px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #f3f4f6;
+  line-height: 1.6;
+}
+.install-prompt {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: #1f2937;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+.install-prompt.show { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.install-prompt button {
+  background: #ef0e74;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.skeleton {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  display: inline-block;
+  height: 1em;
+  width: 60%;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <h1>✈️ Caça-passagem LATAM</h1>
+  <div class="sub">Última atualização: <span id="last-update"><span class="skeleton" style="width:80px"></span></span></div>
+  <div class="route">GRU (São Paulo) ➜ MCO (Orlando) em setembro/2026<br>Volta SFO ou LAX ➜ GRU 30 dias depois<br>1 adulto • econômica • pontos LATAM Pass</div>
+  <button class="refresh-btn" onclick="loadData(true)">↻ Atualizar agora</button>
+</div>
+
+<div class="promo-banner" id="promo-banner">🔥 PROMOÇÃO! Preço mais baixo registrado!</div>
+
+<div class="card">
+  <h2>🏆 Melhor combinação de hoje</h2>
+  <div class="deal">
+    <div class="leg">
+      <div class="label">IDA</div>
+      <div class="route-line">GRU ➜ MCO</div>
+      <div class="date" id="best-out-date"><span class="skeleton"></span></div>
+      <div class="meta" id="best-out-meta"><span class="skeleton"></span></div>
+      <div class="price" id="best-out-price"><span class="skeleton" style="width:120px"></span></div>
+    </div>
+    <div class="leg">
+      <div class="label">VOLTA</div>
+      <div class="route-line" id="best-ret-route">— ➜ GRU</div>
+      <div class="date" id="best-ret-date"><span class="skeleton"></span></div>
+      <div class="meta" id="best-ret-meta"><span class="skeleton"></span></div>
+      <div class="price" id="best-ret-price"><span class="skeleton" style="width:120px"></span></div>
+    </div>
+  </div>
+  <div class="total">
+    <div class="lbl">Total ida + volta</div>
+    <div class="val"><span id="total-miles">—</span> <span style="font-size:18px;font-weight:600;color:#6b7280;">milhas</span></div>
+    <div class="tax">+ taxas: <span id="total-cash">—</span></div>
+  </div>
+  <a class="cta" id="buy-link" href="https://www.latamairlines.com" target="_blank" rel="noopener">Ver na LATAM →</a>
+</div>
+
+<div class="card">
+  <h2>📉 Histórico de preços (milhas totais)</h2>
+  <div class="chart-wrap"><canvas id="price-chart"></canvas></div>
+</div>
+
+<div class="card">
+  <h2>📅 Buscas diárias</h2>
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Busca</th>
+        <th>Ida</th>
+        <th>Volta</th>
+        <th>Total</th>
+        <th>Taxas</th>
+      </tr>
+    </thead>
+    <tbody id="history-body"></tbody>
+  </table>
+</div>
+
+<div class="status" id="status"></div>
+
+<div class="foot">
+  Preços públicos LATAM Pass • Sujeitos a alteração<br>
+  Dados atualizados diariamente às 09:00 (horário de Brasília)
+</div>
+
+</div>
+
+<div class="install-prompt" id="install-prompt">
+  <span>📲 Instalar no celular pra acesso rápido?</span>
+  <button onclick="doInstall()">Instalar</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
 <script>
 let chart = null;
