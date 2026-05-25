@@ -18,6 +18,9 @@ jobs:
         id: data
         run: |
           DATA=$(cat pwa-latam/data.json)
+          ROUTE_COUNT=$(echo "$DATA" | jq '.routes | length')
+
+          # Para cada rota, pega a última entrada e calcula deltas
           BODY=""
           BEST_MILES=999999999
           BEST_NAME=""
@@ -37,10 +40,11 @@ jobs:
             OUT_FMT=$(echo "$OUT_DATE" | awk -F- '{print $3"/"$2}')
             RET_FMT=$(echo "$RET_DATE" | awk -F- '{print $3"/"$2}')
 
+            # Histórico para detectar promoção
             PREV_MIN=$(echo "$DATA" | jq --arg id "$routeId" '[.routes[$id].history[:-1][].totalMiles] | min // 999999999')
             PROMO=""
             if [ "$TOTAL_MI" -lt "$PREV_MIN" ] 2>/dev/null && [ "$PREV_MIN" -ne 999999999 ] 2>/dev/null; then
-              PROMO=" \ud83d\udd25"
+              PROMO=" 🔥"
             fi
 
             MI_FMT=$(printf "%'d" "$TOTAL_MI" 2>/dev/null | tr ',' '.')
@@ -48,6 +52,7 @@ jobs:
 
             BODY="${BODY}• ${NAME}: ${MI_FMT} mi + R\$ ${BRL_FMT} (${OUT_FMT} → ${RET_FROM} ${RET_FMT})${PROMO}\n"
 
+            # Rastreia rota com melhor preço pro título
             if [ "$TOTAL_MI" -lt "$BEST_MILES" ] 2>/dev/null; then
               BEST_MILES=$TOTAL_MI
               BEST_NAME=$NAME
@@ -57,13 +62,14 @@ jobs:
 
           if [ "$NUM_ROUTES" -eq 0 ]; then
             TITLE="✈️ Caça-passagem"
-            BODY="Sem dados disponiveis ainda"
+            BODY="Sem dados disponíveis ainda"
           elif [ "$NUM_ROUTES" -eq 1 ]; then
-            TITLE="✈️ Caça-passagem - ${BEST_NAME}"
+            TITLE="✈️ Caça-passagem • ${BEST_NAME}"
           else
-            TITLE="✈️ Caça-passagem - ${NUM_ROUTES} rotas atualizadas"
+            TITLE="✈️ Caça-passagem • ${NUM_ROUTES} rotas atualizadas"
           fi
 
+          # Remove last \n
           BODY=$(printf "%b" "$BODY" | sed '$ s/\\n$//')
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
@@ -73,6 +79,7 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+          echo ""
           echo "Title: $TITLE"
           echo "Body:"
           echo "$BODY"
