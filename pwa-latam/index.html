@@ -28,20 +28,24 @@ button { font-family: inherit; }
 .icon-btn:active { background: rgba(255,255,255,0.3); }
 .icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.search-bar { background: white; border: 1px solid var(--gray-2); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
-.search-bar .info { flex: 1; font-size: 12px; color: var(--gray-6); }
-.search-bar .info strong { color: var(--gray-9); font-size: 13px; }
-.btn-search { background: linear-gradient(135deg, var(--pink), var(--purple)); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 6px rgba(239, 14, 116, 0.25); }
-.btn-search:active { transform: scale(0.97); }
-.btn-search:disabled { background: var(--gray-2); color: var(--gray-4); box-shadow: none; cursor: not-allowed; transform: none; }
+.next-search { background: white; border: 1px solid var(--gray-2); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center; }
+.next-search .ns-icon { font-size: 24px; flex-shrink: 0; }
+.next-search .ns-text { flex: 1; min-width: 0; }
+.next-search .ns-title { font-size: 13px; color: var(--gray-9); font-weight: 600; }
+.next-search .ns-title strong { color: var(--pink); font-size: 14px; }
+.next-search .ns-detail { font-size: 11px; color: var(--gray-6); margin-top: 2px; }
+.next-search .ns-info-btn { background: var(--gray-1); border: none; width: 32px; height: 32px; border-radius: 999px; font-size: 16px; cursor: pointer; flex-shrink: 0; }
+.next-search .ns-info-btn:active { background: var(--gray-2); }
 
-.search-progress { background: linear-gradient(90deg, #fef3c7, #fde68a); border: 1px solid #fcd34d; color: #92400e; padding: 12px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 12px; display: none; align-items: center; gap: 10px; }
-.search-progress.show { display: flex; }
-.search-progress .spinner { width: 18px; height: 18px; border: 2.5px solid #fcd34d; border-top-color: #92400e; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.search-progress .text { flex: 1; }
-.search-progress .text strong { display: block; font-weight: 700; }
-.search-progress .text small { display: block; font-size: 11px; opacity: 0.85; margin-top: 2px; }
+.search-info-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center; padding: 20px; }
+.search-info-modal.show { display: flex; }
+.search-info-content { background: white; border-radius: 16px; padding: 20px 22px; max-width: 420px; width: 100%; max-height: 80vh; overflow-y: auto; }
+.search-info-content h3 { margin: 0 0 12px 0; font-size: 17px; color: var(--gray-9); }
+.search-info-content p { font-size: 13px; color: var(--gray-9); margin: 8px 0; line-height: 1.5; }
+.search-info-content ul { padding-left: 18px; margin: 8px 0; }
+.search-info-content li { font-size: 13px; margin: 4px 0; }
+.search-info-content .ns-close { background: var(--pink); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 14px; width: 100%; }
+.search-info-content .ns-close:active { background: #d10c66; }
 
 .card { background: #fff; border: 1px solid var(--gray-2); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
 .route-card h3 { margin: 0 0 4px 0; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -153,19 +157,28 @@ button { font-family: inherit; }
 </div>
 </div>
 
-<div class="search-bar">
-<div class="info">
-<strong>⚡ Buscar agora</strong><br>
-Roda na nuvem (1–2 min) e te notifica
+<div class="next-search" id="next-search-widget">
+<div class="ns-icon" id="ns-icon">⏰</div>
+<div class="ns-text">
+<div class="ns-title" id="ns-title">Próxima busca em <strong>—</strong></div>
+<div class="ns-detail" id="ns-detail">Buscas automáticas rodam 3x ao dia</div>
 </div>
-<button class="btn-search" id="btn-search" onclick="triggerSearch()">Buscar</button>
+<button class="ns-info-btn" onclick="showSearchInfo()" title="Como funciona?">ℹ️</button>
 </div>
 
-<div class="search-progress" id="search-progress">
-<div class="spinner"></div>
-<div class="text">
-<strong id="progress-title">🔄 Buscando preços na LATAM...</strong>
-<small id="progress-detail">Isso costuma levar 1 a 2 minutos. Pode fechar o app — você recebe push quando terminar.</small>
+<div class="search-info-modal" id="search-info-modal" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="search-info-content">
+<h3>🔍 Como as buscas funcionam</h3>
+<p>O Caça-passagem roda <strong>3 buscas automáticas por dia</strong> na LATAM:</p>
+<ul>
+<li>🌙 <strong>Madrugada</strong> — 03h (Brasília)</li>
+<li>☀️ <strong>Manhã</strong> — 11h (Brasília)</li>
+<li>🌃 <strong>Noite</strong> — 21h (Brasília)</li>
+</ul>
+<p>Cada busca testa <strong>4 datas diferentes</strong> dentro do mês configurado e escolhe o melhor par ida + volta.</p>
+<p>Quando achar preço bom (mínimo histórico ou queda ≥5%), você recebe <strong>notificação push</strong>.</p>
+<p style="margin-top:14px;padding:10px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e;"><strong>⚠️ Sobre o botão "Buscar agora":</strong> a LATAM bloqueia robôs vindos de servidores na nuvem. Por isso a busca manual foi removida. Mas as 3 buscas/dia continuam funcionando normalmente.</p>
+<button class="ns-close" onclick="document.getElementById('search-info-modal').classList.remove('show')">Entendi</button>
 </div>
 </div>
 
@@ -408,103 +421,54 @@ function renderHome(){
   });
 }
 
-// ===== BUSCAR AGORA (workflow_dispatch) =====
-async function triggerSearch(){
-  if(searchInProgress){toast('Já tem uma busca rodando, aguarda…');return;}
-  const token=localStorage.getItem('gh_token');
-  if(!token){
-    toast('🔑 Configure o token GitHub primeiro (3 min). Vou te levar lá.',3500);
-    setTimeout(()=>showScreen('token'),800);
-    return;
+// ===== Widget de próxima busca automática =====
+const SEARCH_TIMES_BRASILIA = [3, 11, 21]; // madrugada, manhã, noite
+
+function getNextSearchInBrasilia(){
+  const now = new Date();
+  // Converte hora atual para Brasília (UTC-3)
+  const utcMs = now.getTime() + (now.getTimezoneOffset()*60000);
+  const brNow = new Date(utcMs - (3*3600000));
+  const brHour = brNow.getHours();
+  const brMin = brNow.getMinutes();
+
+  // Acha próximo slot
+  let nextHour = SEARCH_TIMES_BRASILIA.find(h => h > brHour);
+  let dayDelta = 0;
+  if(nextHour === undefined){
+    nextHour = SEARCH_TIMES_BRASILIA[0];
+    dayDelta = 1;
   }
-
-  searchInProgress=true;
-  searchStartTime=Date.now();
-  document.getElementById('btn-search').disabled=true;
-  document.getElementById('btn-search').textContent='Buscando…';
-  document.getElementById('progress-title').textContent='⏳ Iniciando busca na nuvem…';
-  document.getElementById('progress-detail').textContent='Disparando o robô. Aguarde uns segundos.';
-  document.getElementById('search-progress').classList.add('show');
-
-  try{
-    // 1) Dispara o workflow
-    const dispatchUrl='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/actions/workflows/'+WORKFLOW_FILE+'/dispatches';
-    const dispatchRes=await fetch(dispatchUrl,{
-      method:'POST',
-      headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','Content-Type':'application/json'},
-      body:JSON.stringify({ref:GH_BRANCH})
-    });
-    if(!dispatchRes.ok){
-      const err=await dispatchRes.text();
-      throw new Error('Falha ao disparar busca (HTTP '+dispatchRes.status+'). '+(dispatchRes.status===403?'O token precisa de permissão "Actions: Read and write".':err.slice(0,100)));
-    }
-
-    document.getElementById('progress-title').textContent='🚀 Busca iniciada! Aguardando o robô terminar…';
-    document.getElementById('progress-detail').textContent='Demora 1–2 min. Pode fechar o app — você recebe push quando acabar.';
-    toast('✅ Busca iniciada na nuvem!');
-
-    // 2) Começa polling
-    setTimeout(pollWorkflowStatus,8000);
-  }catch(e){
-    searchInProgress=false;
-    document.getElementById('btn-search').disabled=false;
-    document.getElementById('btn-search').textContent='Buscar';
-    document.getElementById('search-progress').classList.remove('show');
-    toast('❌ '+e.message,5000);
-  }
+  // Tempo até próximo slot (em minutos)
+  const minutesUntil = (nextHour - brHour - 1) * 60 + (60 - brMin) + dayDelta * 24 * 60;
+  return { hour: nextHour, minutesUntil, brHour, brMin };
 }
 
-async function pollWorkflowStatus(){
-  const token=localStorage.getItem('gh_token');
-  if(!token||!searchInProgress)return;
+function fmtTimeUntil(min){
+  if(min < 1) return 'agora';
+  if(min < 60) return min + ' min';
+  const h = Math.floor(min/60);
+  const m = min % 60;
+  if(h < 24) return h + 'h' + (m>0 ? ' '+m+'min' : '');
+  return Math.floor(h/24) + ' dia(s)';
+}
 
-  try{
-    const runsUrl='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/actions/workflows/'+WORKFLOW_FILE+'/runs?per_page=3';
-    const res=await fetch(runsUrl,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json'}});
-    if(!res.ok)throw new Error('Erro consultando status: '+res.status);
-    const json=await res.json();
+function slotLabelByHour(h){
+  if(h===3) return '🌙 Madrugada (03h)';
+  if(h===11) return '☀️ Manhã (11h)';
+  if(h===21) return '🌃 Noite (21h)';
+  return h+'h';
+}
 
-    // Pega o run mais recente que tenha começado depois do nosso trigger
-    const ourRun=(json.workflow_runs||[]).find(r=>{
-      const created=new Date(r.created_at).getTime();
-      return created>=searchStartTime-15000;
-    });
+function updateNextSearchWidget(){
+  const next = getNextSearchInBrasilia();
+  document.getElementById('ns-title').innerHTML = 'Próxima busca em <strong>' + fmtTimeUntil(next.minutesUntil) + '</strong>';
+  document.getElementById('ns-detail').textContent = slotLabelByHour(next.hour) + ' (Brasília)';
+  document.getElementById('ns-icon').textContent = next.minutesUntil < 30 ? '⏳' : '⏰';
+}
 
-    if(!ourRun){
-      // Ainda não apareceu, tenta de novo em 5s
-      setTimeout(pollWorkflowStatus,5000);
-      return;
-    }
-
-    const elapsed=Math.round((Date.now()-searchStartTime)/1000);
-    if(ourRun.status==='completed'){
-      searchInProgress=false;
-      document.getElementById('btn-search').disabled=false;
-      document.getElementById('btn-search').textContent='Buscar';
-      if(ourRun.conclusion==='success'){
-        document.getElementById('progress-title').textContent='✅ Busca concluída!';
-        document.getElementById('progress-detail').textContent='Atualizando preços… ('+elapsed+'s)';
-        setTimeout(()=>{
-          document.getElementById('search-progress').classList.remove('show');
-          loadAll(true);
-          toast('🎉 Preços atualizados!',3000);
-        },2500);
-      }else{
-        document.getElementById('progress-title').textContent='⚠️ Busca terminou com aviso';
-        document.getElementById('progress-detail').innerHTML='Status: '+ourRun.conclusion+'. <a href="'+ourRun.html_url+'" target="_blank" style="color:#1e40af;text-decoration:underline;">Ver detalhes no GitHub</a>';
-        setTimeout(()=>document.getElementById('search-progress').classList.remove('show'),8000);
-      }
-    }else{
-      // ainda rodando
-      document.getElementById('progress-title').textContent='🔄 Robô buscando na LATAM… ('+elapsed+'s)';
-      document.getElementById('progress-detail').textContent='Status: '+ourRun.status+'. Continue usando o app — vou avisar quando terminar.';
-      setTimeout(pollWorkflowStatus,8000);
-    }
-  }catch(e){
-    // Não trava — só loga e tenta de novo
-    console.warn('Poll error:',e);
-    setTimeout(pollWorkflowStatus,12000);
-  }
+function showSearchInfo(){
+  document.getElementById('search-info-modal').classList.add('show');
 }
 
 function renderRouteList(){
@@ -613,7 +577,9 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installProm
 function doInstall(){if(installPromptEvent){installPromptEvent.prompt();installPromptEvent.userChoice.then(()=>{document.getElementById('install-prompt').classList.remove('show');installPromptEvent=null;});}}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('SW reg failed',err));});}
 loadAll();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!searchInProgress)loadAll(true);});
+updateNextSearchWidget();
+setInterval(updateNextSearchWidget, 60000); // atualiza a cada 1 minuto
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadAll(true);updateNextSearchWidget();}});
 </script>
 </body>
 </html>
