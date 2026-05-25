@@ -88,14 +88,14 @@ jobs:
                 const cabin = route.cabin || 'Economy';
                 const redemption = route.redemption !== false;
 
-                console.log(`\nBuscando ${route.id}: ${route.outboundFrom}â${route.outboundTo} em ${outDate}`);
+                console.log(`\nBuscando ${route.id}: ${route.outboundFrom}→${route.outboundTo} em ${outDate}`);
                 const out = await searchOne(route.outboundFrom, route.outboundTo, outDate, redemption, passengers, cabin);
                 console.log('  Out:', out);
 
-                const candidates = route.returnToCandidates && route.returnToCandidates.length ? route.returnDoCandidates : [route.returnFrom || route.outboundTo];
+                const candidates = route.returnToCandidates && route.returnToCandidates.length ? route.returnToCandidates : [route.returnFrom || route.outboundTo];
                 let bestRet = null;
                 for (const cand of candidates) {
-                  console.log(`Buscando volta ${cand}â${route.returnTo || route.outboundFrom} em ${retDate}`);
+                  console.log(`Buscando volta ${cand}→${route.returnTo || route.outboundFrom} em ${retDate}`);
                   const ret = await searchOne(cand, route.returnTo || route.outboundFrom, retDate, redemption, passengers, cabin);
                   console.log('  Ret:', ret);
                   if (ret.miles && (!bestRet || ret.miles < bestRet.miles)) {
@@ -104,7 +104,7 @@ jobs:
                 }
 
                 if (!out.miles || !bestRet) {
-                  console.log('Sem dados pra essa rota â pulando');
+                  console.log('Sem dados pra essa rota — pulando');
                   continue;
                 }
 
@@ -114,8 +114,8 @@ jobs:
                   hour: hourBR,
                   slot,
                   source: 'manual-search',
-                  out: { from: route.outboundFrom, to: route.outboundTo, depDate: outDate, dateLabel: outDate, time: 'â', duration: 'â', stops: 0, stopsLabel: 'â', miles: out.miles, cashBRL: out.cashBRL || 0 },
-                  ret: { from: bestRet.from, to: route.returnTo || route.outboundFrom, depDate: retDate, dateLabel: retDate, time: 'â', duration: 'â', stops: 0, stopsLabel: 'â', miles: bestRet.miles, cashBRL: bestRet.cashBRL || 0 },
+                  out: { from: route.outboundFrom, to: route.outboundTo, depDate: outDate, dateLabel: outDate, time: '—', duration: '—', stops: 0, stopsLabel: '—', miles: out.miles, cashBRL: out.cashBRL || 0 },
+                  ret: { from: bestRet.from, to: route.returnTo || route.outboundFrom, depDate: retDate, dateLabel: retDate, time: '—', duration: '—', stops: 0, stopsLabel: '—', miles: bestRet.miles, cashBRL: bestRet.cashBRL || 0 },
                   totalMiles: out.miles + bestRet.miles,
                   totalCashBRL: (out.cashBRL || 0) + (bestRet.cashBRL || 0)
                 };
